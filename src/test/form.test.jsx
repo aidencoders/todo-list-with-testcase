@@ -4,32 +4,42 @@ import { toHaveAttribute } from '@testing-library/jest-dom';
 import Form from '../components/form';
 
 describe('Form test', () => {
+  const setup = (props = {}) => {
+    const form = render(<Form {...props} />);
+    const { getByTestId, getByPlaceholderText } = form;
+    const input = getByPlaceholderText('할 일을 입력하세요');
+    const button = getByTestId('form__button');
+
+    return {
+      ...form,
+      input,
+      button
+    };
+  };
+
   it('has input and a button', () => {
     act(() => {
-      const { getByPlaceholderText, getByTestId }= render(<Form />);
-      getByPlaceholderText('할 일을 입력하세요');
-      getByTestId('form__button');
+      const { input, button } = setup();
+      expect(input).toBeTruthy();
+      expect(button).toBeTruthy();
     });
   });
 
   it('change event', () => {
-    const { getByPlaceholderText }= render(<Form />);
-    const input = getByPlaceholderText('할 일을 입력하세요');
+    const { input } = setup();
+
     fireEvent.change(input, {
       target: {
-        value: 'TDD 지식 공유'
+        value: 'TDD 지식 공유',
       }
     });
+
     expect(input).toHaveAttribute('value', 'TDD 지식 공유');
   });
 
   it('calls onInsert and clears input', () => {
     const onInsert = jest.fn();
-    const { getByText, getByPlaceholderText } = render(
-      <Form onInsert={onInsert} />
-    );
-    const input = getByPlaceholderText('할 일을 입력하세요');
-    const button = getByText('등록');
+    const { input, button } = setup({ onInsert });
 
     fireEvent.change(input, {
       target: {
